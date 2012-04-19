@@ -1,5 +1,5 @@
 /**
- * jQuery Masonry v2.1.03
+ * jQuery Masonry v2.1.04
  * A dynamic layout plugin for jQuery
  * The flip-side of CSS Floats
  * http://masonry.desandro.com
@@ -45,7 +45,7 @@
 
       if ( resizeTimeout ) { clearTimeout( resizeTimeout ); }
       resizeTimeout = setTimeout(function() {
-        jQuery.event.handle.apply( context, args );
+        $.event.handle.apply( context, args );
       }, execAsap === "execAsap"? 0 : 100 );
     }
   };
