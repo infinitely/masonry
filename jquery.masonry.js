@@ -69,6 +69,8 @@
 
   $.Mason.settings = {
     isResizable: true,
+    isDraggable: false,
+    dragHandleSelector: null,
     isAnimated: false,
     animationOptions: {
       queue: false,
@@ -144,8 +146,14 @@
       // need to get bricks
       this.reloadItems();
 
+      // set up dragging
+      if (this.options.isDraggable ){
+        this._initDrag(this.$bricks);
+      }
+
     },
-  
+
+
     // _init fires when instance is first created
     // and when instance is triggered again -> $el.masonry();
     _init : function( callback ) {
@@ -382,6 +390,77 @@
       
       $(window).unbind('.masonry');
 
+    },
+
+    _getBrickCenter : function($brick){
+      var offset = $brick.offset();
+      return {
+        x  : offset.left - ( $brick.outerWidth()  / 2 ),
+        y : offset.top  - ( $brick.outerHeight() / 2 ) 
+      };
+    },
+
+    _injIndex : function(injBrick){
+
+      var $injBrick = $(injBrick),
+          _this = this,
+          injCenter = this._getBrickCenter($injBrick),
+          cDist = null,
+          cIndex, center, dx, dy, d;
+
+      // find the index of the closest brick
+      this.$bricks.each(function(i, brick){
+
+        center = _this._getBrickCenter($(brick));
+
+        dx = injCenter.x - center.x;
+        dy = injCenter.y - center.y;
+        d = Math.sqrt(dx * dx + dy * dy);
+
+        if(cDist === null || d < cDist){
+          cDist = d;
+          cIndex = (center.x > injCenter.x) ? i : i+1;
+        }
+      });
+
+      return cIndex;
+    },
+
+    _initDrag : function($bricks){
+
+      var _this = this,
+          dragged = null;
+
+      $bricks.bind('dragstart', function(e) {
+
+        // make sure we're dragging by the right thing
+        if(_this.options.dragHandleSelector !== null 
+          && !$(this).is(_this.options.dragHandleSelector)){
+          return false;
+        }
+
+        // remove the brick being dragged from the array
+        dragged = this;
+        _this.$bricks = _this.$bricks.not(this);
+        _this._reLayout();
+
+      }).bind('drag', function(e, drag) {
+
+        $(this).css({
+          top  : drag.offsetY,
+          left : drag.offsetX
+        });
+
+      }).bind('dragend', function(e) {
+        
+        // find where the brick should be injected
+        var injIndex = _this._injIndex(dragged);
+
+        // insert the brick back into the array
+        _this.$bricks.splice(injIndex , 0, dragged);
+        dragged = null;
+        _this._reLayout();
+      });
     }
     
   };
