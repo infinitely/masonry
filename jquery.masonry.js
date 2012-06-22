@@ -404,7 +404,7 @@
       return {
         $brick: $brick,
         x  : offset.left + ($brick.outerWidth()/2),
-        y : offset.top + ($brick.outerHeight()/2),
+        y : offset.top + ($brick.outerHeight()/2)
       };
     },
 
@@ -429,7 +429,7 @@
           closest = {
             dist: dist,
             $brick: $b,
-            index: (point.x > dPoint.x) ? i : i+1,
+            index: (point.x > dPoint.x) ? i : i+1
           };
         }
 
@@ -445,7 +445,7 @@
             closest = {
               dist: dist,
               $brick: $b,
-              index: (point.x > dPoint.x) ? i : i+1,
+              index: (point.x > dPoint.x) ? i : i+1
             };
           }
         }
@@ -466,8 +466,7 @@
       $bricks.bind('dragstart', function(e) {
 
         // make sure we're dragging by the right thing
-        if(_this.options.dragHandleSelector !== null
-          && !$(e.target).is(_this.options.dragHandleSelector)){
+        if(_this.options.dragHandleSelector !== null && !$(e.target).is(_this.options.dragHandleSelector)){
           return false;
         }
 
