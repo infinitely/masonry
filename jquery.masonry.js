@@ -399,13 +399,6 @@
         return Math.sqrt(dx*dx + dy*dy);
     },
 
-    _getMidpoint : function(point1, point2){
-      return {
-        x : (point1.x + point2.x) / 2,
-        y : (point1.y + point2.y) / 2
-      }
-    },
-
     _getBrickPoint : function($brick){
       var offset = $brick.offset();
       return {
