@@ -71,6 +71,7 @@
     isResizable: true,
     isDraggable: false,
     dragHandleSelector: null,
+    dragClass: null,
     isAnimated: false,
     animationOptions: {
       queue: false,
@@ -392,51 +393,96 @@
 
     },
 
-    _getBrickCenter : function($brick){
+    _getDistanceBetween : function(point1, point2){
+        var dx = point1.x - point2.x,
+            dy = point1.y - point2.y;
+        return Math.sqrt(dx*dx + dy*dy);
+    },
+
+    _getMidpoint : function(point1, point2){
+      return {
+        x : (point1.x + point2.x) / 2,
+        y : (point1.y + point2.y) / 2
+      }
+    },
+
+    _getBrickPoint : function($brick){
       var offset = $brick.offset();
       return {
-        x  : offset.left - ( $brick.outerWidth()  / 2 ),
-        y : offset.top  - ( $brick.outerHeight() / 2 ) 
+        $brick: $brick,
+        x  : offset.left + ($brick.outerWidth()/2),
+        y : offset.top + ($brick.outerHeight()/2),
       };
     },
 
-    _injIndex : function(injBrick){
+    _getClosestBrick : function(brick){
 
-      var $injBrick = $(injBrick),
+      var $brick = $(brick),
           _this = this,
-          injCenter = this._getBrickCenter($injBrick),
-          cDist = null,
-          cIndex, center, dx, dy, d;
+          dPoint = this._getBrickPoint($brick),
+          closest = null,
+          point, dist, $b, last, midpoint;
 
       // find the index of the closest brick
-      this.$bricks.each(function(i, brick){
+      this.$bricks.each(function(i, b){
 
-        center = _this._getBrickCenter($(brick));
+        $b = $(b);
+        point = _this._getBrickPoint($b);
 
-        dx = injCenter.x - center.x;
-        dy = injCenter.y - center.y;
-        d = Math.sqrt(dx * dx + dy * dy);
+        // first check the distance from the brick center
+        dist = _this._getDistanceBetween(dPoint, point);
 
-        if(cDist === null || d < cDist){
-          cDist = d;
-          cIndex = (center.x > injCenter.x) ? i : i+1;
+        if(closest === null || dist < closest.dist){
+          closest = {
+            dist: dist,
+            $brick: $b,
+            index: (point.x > dPoint.x) ? i : i+1,
+          };
         }
+
+        // get the distance between the center of the line
+        // connecting the current and last block
+        if(typeof last !== 'undefined'){
+          midpoint = {
+            x : (last.x + point.x) / 2,
+            y : (last.y + point.y) / 2
+          };
+          dist = _this._getDistanceBetween(dPoint, midpoint);
+          if(dist < closest.dist){
+            closest = {
+              dist: dist,
+              $brick: $b,
+              index: (point.x > dPoint.x) ? i : i+1,
+            };
+          }
+        }
+
+        last = point;
+
       });
 
-      return cIndex;
+      return closest;
     },
 
     _initDrag : function($bricks){
 
       var _this = this,
-          dragged = null;
+          dragged = null,
+          pos, closest;
 
       $bricks.bind('dragstart', function(e) {
 
         // make sure we're dragging by the right thing
-        if(_this.options.dragHandleSelector !== null 
-          && !$(this).is(_this.options.dragHandleSelector)){
+        if(_this.options.dragHandleSelector !== null
+          && !$(e.target).is(_this.options.dragHandleSelector)){
           return false;
+        }
+
+        pos = $(this).position();
+
+        // add the dragClass
+        if(_this.options.dragClass !== null){
+          $(this).addClass(_this.options.dragClass);
         }
 
         // remove the brick being dragged from the array
@@ -444,21 +490,25 @@
         _this.$bricks = _this.$bricks.not(this);
         _this._reLayout();
 
-      }).bind('drag', function(e, drag) {
+      }).bind('drag', function(e, dd) {
 
         $(this).css({
-          top  : drag.offsetY,
-          left : drag.offsetX
+          top  : pos.top  + dd.deltaY,
+          left : pos.left + dd.deltaX
         });
 
       }).bind('dragend', function(e) {
         
-        // find where the brick should be injected
-        var injIndex = _this._injIndex(dragged);
+        // remove the dragClass
+        if(_this.options.dragClass !== null){
+          $(this).removeClass(_this.options.dragClass);
+        }
 
         // insert the brick back into the array
-        _this.$bricks.splice(injIndex , 0, dragged);
+        closest = _this._getClosestBrick(dragged);
+        _this.$bricks.splice(closest.index , 0, dragged);
         dragged = null;
+
         _this._reLayout();
       });
     }
