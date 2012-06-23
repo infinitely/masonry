@@ -457,11 +457,32 @@
       return closest;
     },
 
+    _createGhostBrick : function($brick){
+
+        var closest = this._getClosestBrick($brick),
+            $ghost  = $brick.clone().html('').addClass('drag-ghost'),
+            pos     = $brick.position();
+
+        $ghost.css({
+          width     : $brick.width(),
+          height    : $brick.height()
+        });
+
+        this.$bricks.splice(closest.index, 0, $ghost[0]);
+        this.element.append($ghost);
+        this._reLayout();
+
+        return closest.index;
+    },
+
     _initDrag : function($bricks){
 
       var _this = this,
           dragged = null,
-          pos, closest;
+          pos, closest, 
+          ghostInterval = null, 
+          ghostIndex = -1, 
+          ghostTime, ghostReset;
 
       $bricks.bind('dragstart', function(e) {
 
@@ -482,6 +503,24 @@
         _this.$bricks = _this.$bricks.not(this);
         _this._reLayout();
 
+        ghostTime = ghostReset = new Date().getTime();
+
+        ghostInterval = setInterval(function(){
+          if(ghostReset !== ghostTime){
+            if(ghostIndex !== -1){
+              $(_this.$bricks.splice(ghostIndex,1)).fadeOut(function(){
+                $(this).remove();       
+              });
+              ghostIndex = -1;
+              _this._reLayout();
+            }
+            if(new Date().getTime() - ghostReset > 200){
+              ghostIndex = _this._createGhostBrick($(dragged));
+              ghostTime = ghostReset;
+            }
+          }
+        }, 100);
+
       }).bind('drag', function(e, dd) {
 
         $(this).css({
@@ -489,17 +528,32 @@
           left : pos.left + dd.deltaX
         });
 
+        ghostReset = new Date().getTime();
+
       }).bind('dragend', function(e) {
-        
+
+        // clear the ghosting interval
+        clearInterval(ghostInterval);
+      
         // remove the dragClass
         if(_this.options.dragClass !== null){
           $(this).removeClass(_this.options.dragClass);
         }
 
         // insert the brick back into the array
-        closest = _this._getClosestBrick(dragged);
-        _this.$bricks.splice(closest.index , 0, dragged);
+        if(ghostIndex !== -1) {
+          var $ghost = $(_this.$bricks[ghostIndex]);
+          $ghost.fadeOut(function(){
+            $ghost.remove();
+          });
+          _this.$bricks[ghostIndex] = dragged;
+          ghostIndex = -1;
+        } else {
+          closest = _this._getClosestBrick(dragged);
+          _this.$bricks.splice(closest.index , 0, dragged);
+        }
         dragged = null;
+
 
         _this._reLayout();
       });

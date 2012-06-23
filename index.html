@@ -3,7 +3,7 @@
 <head>
   <title>Masonry Drag and Drop</title>
   <style type="text/css">
-    .box-item {
+      .box-item {
         width: 100px;
         height: 100px;
         float: left;
@@ -17,11 +17,15 @@
         cursor: move;
       }
 
+      .drag-ghost { 
+        opacity: 0.5; 
+        z-index: 0;
+      }
+
       .color1 { background-color: blue; z-index: 9999;}
       .color2 { background-color: green;}
       .bigger { height: 150px; }
-      .smaller { height: 75px; width: 200px; }
-      .drag-ghost { background-color: orange; }
+      .smaller { height: 75px; width: 200px; }      
   </style>
   <script src="js/jquery-1.7.1.min.js"></script>
   <script src="js/jquery.event.drag-2.2.js"></script>
