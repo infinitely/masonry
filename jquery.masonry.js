@@ -487,7 +487,8 @@
       $bricks.bind('dragstart', function(e) {
 
         // make sure we're dragging by the right thing
-        if(_this.options.dragHandleSelector !== null && !$(e.target).is(_this.options.dragHandleSelector)){
+        if(_this.options.dragHandleSelector !== null 
+          && !$(e.target).is(_this.options.dragHandleSelector)){
           return false;
         }
 
@@ -508,8 +509,13 @@
         ghostInterval = setInterval(function(){
           if(ghostReset !== ghostTime){
             if(ghostIndex !== -1){
+
+              if(_this._getClosestBrick($(dragged)).index === ghostIndex){
+                return;
+              }
+
               $(_this.$bricks.splice(ghostIndex,1)).fadeOut(function(){
-                $(this).remove();       
+                $(this).remove();
               });
               ghostIndex = -1;
               _this._reLayout();
