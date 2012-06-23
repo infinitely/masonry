@@ -510,6 +510,8 @@
           if(ghostReset !== ghostTime){
             if(ghostIndex !== -1){
 
+              // this kinda sucks because it doesn't use the original
+              // position of the bricks
               if(_this._getClosestBrick($(dragged)).index === ghostIndex){
                 return;
               }
