@@ -72,6 +72,8 @@
     isDraggable: false,
     dragHandleSelector: null,
     dragClass: null,
+    dragStart: null,
+    dragStop: null,
     isAnimated: false,
     animationOptions: {
       queue: false,
@@ -470,6 +472,10 @@
           return false;
         }
 
+        if (_this.options.dragStart !== null) {
+          _this.options.dragStart.call();
+        }
+
         pos = $(this).position();
 
         // add the dragClass
@@ -491,6 +497,10 @@
 
       }).bind('dragend', function(e) {
         
+        if (_this.options.dragStop !== null) {
+          _this.options.dragStop.call();
+        }
+
         // remove the dragClass
         if(_this.options.dragClass !== null){
           $(this).removeClass(_this.options.dragClass);
