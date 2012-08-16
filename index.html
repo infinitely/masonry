@@ -47,8 +47,8 @@
       isAnimated  : true,
       isDraggable : true,
       dragHandleSelector: '.handle',
-      dragStart: function(){ console.log('starting drag!'); },
-      dragStop: function(){ console.log('ending drag!'); },
+      dragStart: function(item){ console.log('starting drag!',item.text()); },
+      dragStop: function(item){ console.log('ending drag!',item.text()); },
       dragClass: 'color1'
     });
   </script>

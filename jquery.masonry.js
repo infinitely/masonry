@@ -8,6 +8,8 @@
  * Copyright 2012 David DeSandro
  */
 
+// Forked on github.com/infinitely/masonry
+
 /*jshint browser: true, curly: true, eqeqeq: true, forin: false, immed: false, newcap: true, noempty: true, strict: true, undef: true */
 /*global jQuery: false */
 
@@ -473,7 +475,7 @@
         }
 
         if (_this.options.dragStart !== null) {
-          _this.options.dragStart.call();
+          _this.options.dragStart.call(this, $(this));
         }
 
         pos = $(this).position();
@@ -498,7 +500,7 @@
       }).bind('dragend', function(e) {
         
         if (_this.options.dragStop !== null) {
-          _this.options.dragStop.call();
+          _this.options.dragStop.call(this, $(this));
         }
 
         // remove the dragClass
